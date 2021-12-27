@@ -67,13 +67,13 @@ def draw_buttons(widths, heights, boxwidth, boxheight, phrases, boxcolor, fontco
     """
     Given information about a series of buttons to be built, draw those buttons and return their hitboxes.
 
-    widths -- List of integer x-axis placements in the window (one for each button)
-    heights -- List of integer y-axis placements in the window (one for each button)
-    boxwidth -- Integer for the width of each button to be drawn
-    boxheight -- Integer for the height of each button to be drawn
-    phrases -- List of strings that are the text that will go into each button
-    boxcolor -- RGB tuple of the background color for each button
-    fontcolor -- RGB tuple of the foreground color for each button
+    widths -- List of integer x-axis placements in the window (one for each button)\n
+    heights -- List of integer y-axis placements in the window (one for each button)\n
+    boxwidth -- Integer for the width of each button to be drawn\n
+    boxheight -- Integer for the height of each button to be drawn\n
+    phrases -- List of strings that are the text that will go into each button\n
+    boxcolor -- RGB tuple of the background color for each button\n
+    fontcolor -- RGB tuple of the foreground color for each button\n
     """
     buttons = []
     for i in range(len(phrases)):
@@ -92,11 +92,11 @@ def draw_text(widths, heights, phrases, fonttypes, fontcolor):
     """
     Given information about text boxes to be drawn, this draws the text into the window.
 
-    widths -- List of integer x-axis placements in the window (one for each piece of text)
-    heights -- List of integer y-axis placements in the window (one for each piece of text)
-    phrases -- List of strings that are the text to be displayed
-    fonttypes -- List of fonts (one for each piece of text)
-    fontcolor -- RGB tuple of the foreground color of the text
+    widths -- List of integer x-axis placements in the window (one for each piece of text)\n
+    heights -- List of integer y-axis placements in the window (one for each piece of text)\n
+    phrases -- List of strings that are the text to be displayed\n
+    fonttypes -- List of fonts (one for each piece of text)\n
+    fontcolor -- RGB tuple of the foreground color of the text\n
     """
     for i in range(len(phrases)):
         text = fonttypes[i].render(phrases[i], True, fontcolor)
@@ -239,10 +239,10 @@ def pg_events(board, buttons, difficulty, wrongGuesses):
     """
     Handles all user input events that occer during the sudoku game. Returns integer amount of wrongGuesses and string/None for difficulty.
 
-    board -- Class of the sudoku grid being displayed
-    buttons -- Hitboxes for all buttons in the GUI 
-    difficulty -- String of the difficulty of the game
-    wrongGuesses -- Integer amount of wrong guesses made by the user
+    board -- Class of the sudoku grid being displayed\n
+    buttons -- Hitboxes for all buttons in the GUI \n
+    difficulty -- String of the difficulty of the game\n
+    wrongGuesses -- Integer amount of wrong guesses made by the user\n
     """
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
