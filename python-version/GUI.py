@@ -4,8 +4,7 @@ import sys
 pygame.init()
 pygame.font.init()
 
-from puzzle_scraper import get_puzzle
-from sudoku import solve
+from generate import generate_puzzle
 
 
 # Website for sudoku puzzles and queries corresponding to puzzle difficulties
@@ -30,11 +29,13 @@ MARGIN = 25
 WHITE = (255, 255, 255)
 LIGHTGREY = (225, 225, 225)
 RED = (245, 87, 87)
+BLUE = (0, 0, 245)
 BLACK = (0, 0, 0)
 LARGEFONT = pygame.font.SysFont("Courier", 30)
 BUTTONFONT = pygame.font.SysFont("Courier", 16)
 SMALLFONT = pygame.font.SysFont("Courier", 13)
 NUMBERFONT = pygame.font.SysFont("Helvetica", 30)
+SMALLNUMBERFONT = pygame.font.SysFont("Helvetica", 14)
 
 # Window and dictionary relating pygame keypresses to integers
 DISPLAY = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -122,7 +123,14 @@ class Board:
         self.selected = None
         # Permanents is a list of boxes whose values cannot be deleted
         self.permanents = []
+        self.notes = dict()
+        self.init_notes()
         self.update_permanents()
+
+    def init_notes(self):
+        for box_x in range(FIELDSIZE):
+            for box_y in range(FIELDSIZE):
+                self.notes[(box_x, box_y)] = []
 
     def update_permanents(self):
         """
@@ -145,15 +153,40 @@ class Board:
 
                 # If the space is not empty
                 if self.puzzle[box_x][box_y]:
+                    self.notes[(box_x, box_y)] = []
 
-                    # If the number in the space is not correct
+                    # If the number in the space is not correct, background of box becomes red
                     if self.puzzle[box_x][box_y] != self.solved[box_x][box_y]:
                         pygame.draw.rect(DISPLAY, RED, (left, top, BOXSIZE, BOXSIZE))
 
+                    # Draw number
                     number = NUMBERFONT.render(str(self.puzzle[box_x][box_y]), True, BLACK)
                     rect = number.get_rect()
                     rect.center = (left + BOXSIZE / 2, top + BOXSIZE / 2)
                     DISPLAY.blit(number, rect)
+                
+                else:
+                    for note in self.notes[(box_x, box_y)]:
+                        if note % 3 == 1:
+                            width = 1.2 * (BOXSIZE / 5)
+                        elif note % 3 == 2:
+                            width = 2.5 * (BOXSIZE / 5)
+                        else:
+                            width = 3.8 * (BOXSIZE / 5)
+                        if note in range(1, 4):
+                            height = 1.2 * (BOXSIZE / 5)
+                        elif note in range(4, 7):
+                            height = 2.6 * (BOXSIZE / 5)
+                        else:
+                            height = 4 * (BOXSIZE / 5)
+                        number = SMALLNUMBERFONT.render(str(note), True, BLACK)
+                        rect = number.get_rect()
+                        rect.center = (left + width, top + height)
+                        DISPLAY.blit(number, rect)
+
+                # Draw box outline
+                if (box_x, box_y) == self.selected:
+                    pygame.draw.rect(DISPLAY, BLUE, (left, top, BOXSIZE, BOXSIZE), 2)
 
     def select_square(self, mouse):
         """
@@ -190,16 +223,22 @@ class Board:
 
         return wrongGuesses
 
+    def draw_notes(self, number):
+        if self.selected:
+            if not self.puzzle[self.selected[0]][self.selected[1]]:
+                if number in self.notes[self.selected]:
+                    self.notes[self.selected].remove(number)
+                else:
+                    self.notes[self.selected].append(number)
+
     def delete_number(self):
         """
         If a space in the grid is selected, delete the number inside that space if the space is not empty and is not in permanents. 
         """
         # If a space has been selected
         if self.selected:
-
             # If there is a number inside the space
             if self.puzzle[self.selected[0]][self.selected[1]]: 
-
                 # If the space is not in permanents (number inside the space is not correct), delete the number inside the space
                 if (self.selected[0], self.selected[1]) not in self.permanents:
                     self.puzzle[self.selected[0]][self.selected[1]] = 0
@@ -266,7 +305,10 @@ def pg_events(board, buttons, difficulty, wrongGuesses):
             for key in NUMBERKEYS:
                 # If the user keys in a number, use draw_number to add it to the puzzle if the correct conditions are met
                 if event.key == key:
-                    wrongGuesses = board.draw_number(NUMBERKEYS[key], wrongGuesses)
+                    if pygame.key.get_mods() & pygame.KMOD_SHIFT:
+                        board.draw_notes(NUMBERKEYS[key])
+                    else:
+                        wrongGuesses = board.draw_number(NUMBERKEYS[key], wrongGuesses)
 
             # If the user presses backspace, use delete_number to delete a number in a selected space if the right conditions are met
             if event.key == pygame.K_BACKSPACE:
@@ -301,18 +343,18 @@ def main():
             if click == 1:
                 mouse = pygame.mouse.get_pos()
                 if difficultyButtons[0].collidepoint(mouse):
-                    difficulty = "hard"
+                    difficulty = 2
                 elif difficultyButtons[1].collidepoint(mouse):
-                    difficulty = "evil"
+                    difficulty = 3
                 elif difficultyButtons[2].collidepoint(mouse):
-                    difficulty = "easy"
+                    difficulty = 0
                 elif difficultyButtons[3].collidepoint(mouse):
-                    difficulty = "medium"
+                    difficulty = 1
 
             if difficulty is not None:
                 # Get puzzle of indicated difficulty and solve
-                puzzle = get_puzzle(SITE, QUERIES[difficulty])
-                solved = solve(puzzle)
+                # puzzle = get_puzzle(SITE, QUERIES[difficulty])
+                puzzle, solved = generate_puzzle(difficulty)
                 # Initiate grid for puzzle
                 board = Board(puzzle, solved)
 

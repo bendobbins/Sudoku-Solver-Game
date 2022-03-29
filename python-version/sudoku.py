@@ -57,10 +57,11 @@ def check_row_or_column(array):
     return numberList
 
 
-def solve(puzzle):
+def solve(puzzle, numEndings):
     """
     Takes a starting puzzle grid for a sudoku game and returns a solution grid using the backtracking algorithm.
     """
+    counter = 0
     frontier = StackFrontier()
     # Get possible actions for the first empty space in the grid as well as coordinates for the space
     options = available(puzzle)
@@ -72,7 +73,9 @@ def solve(puzzle):
     while True:
         # No solution if no possible paths
         if frontier.empty():
-            raise Exception("No solution")
+            if not numEndings:
+                raise Exception("No solution")
+            return counter
 
         # Set puzzle equal to first state on stack
         puzzle = frontier.remove()
@@ -89,7 +92,10 @@ def solve(puzzle):
 
         # If there are no empty spaces, puzzle is solved
         if options[1] is None:
-            return puzzle
+            if numEndings:
+                counter += 1
+            else:
+                return puzzle
 
 
 def change_state(puzzle, action, number):
